@@ -43,7 +43,7 @@ class MicroserviceSender:
         socket = context.socket(zmq.REQ)
         socket.connect("tcp://localhost:30000")
 
-        customer_name = input("Enter the customer name@: ")
+        customer_name = input("Enter the customer name: ")
         request_reservation_json = {
             "request": {
                 "event": "reservationData",
@@ -55,6 +55,8 @@ class MicroserviceSender:
         socket.send_json(request_reservation_json)
 
         recv_message = socket.recv_string()
+
+        # Extract JSON response
         print("Receive message = %s" % recv_message)
 
         socket.close()

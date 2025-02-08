@@ -25,13 +25,25 @@ def reservaion_records():
             # Extract customer data from customer_data.csv
             df = pd.read_csv(RESERVATION_DATA)
             df = df[df['Name'] == customer_name]
-            print(df)
+
+            history = ""
+            for index, row in df.iterrows():
+                history += '{'
+                history += '"Date": ' + str(row['Date'])
+                history += '"Time": ' + str(row['Time'])
+                history += '"Number": ' + str(row['Number'])
+                history += '},'
 
             # Make response data of JSON format
             response_json = {
                 "request": {
-                    "event": "reservationDataError",
-                    "body": {}
+                    "event": "reservationData",
+                    "body": {
+                        "customerName": customer_name,
+                        "history": [
+                            history
+                        ]
+                    }
                 }
             }
         else:
