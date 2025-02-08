@@ -1,4 +1,5 @@
 import zmq
+import matplotlib.pyplot as plt
 
 
 class MicroserviceSender:
@@ -43,7 +44,9 @@ class MicroserviceSender:
         socket = context.socket(zmq.REQ)
         socket.connect("tcp://localhost:30000")
 
+        # Send request json
         customer_name = input("Enter the customer name: ")
+        print("\n")
         request_reservation_json = {
             "request": {
                 "event": "reservationData",
@@ -54,10 +57,22 @@ class MicroserviceSender:
         }
         socket.send_json(request_reservation_json)
 
-        recv_message = socket.recv_string()
-
         # Extract JSON response
-        print("Receive message = %s" % recv_message)
+        receive_reservaion_json = socket.recv_json()
+        reservation_count = 0
+        histories = receive_reservaion_json['request']['body']['history']
+        for data in histories:
+            reservation_count += 1
+
+        # Show analyze message
+        print("Results of analyzed reservation by a customer")
+        print(
+            str(customer_name) +
+            " had " +
+            str(reservation_count) +
+            " reservations in the entire period."
+        )
+        print("\n")
 
         socket.close()
         context.destroy()
