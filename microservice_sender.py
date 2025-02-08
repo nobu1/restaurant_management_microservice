@@ -1,8 +1,4 @@
 import zmq
-from .microservice_a.microservice_a_receiver import MicroserviceA
-from .microservice_b.microservice_b_receiver import MicroserviceB
-from .microservice_c.microservice_c_receiver import MicroserviceC
-from .microservice_d.microservice_d_receiver import MicroserviceD
 
 
 class MicroserviceSender:
@@ -22,10 +18,6 @@ class MicroserviceSender:
 
             microserviceSender = MicroserviceSender()
             if microservice_input == "1":
-                # Start Microservice A receiver
-                microserviceA = MicroserviceA()
-                microserviceA.reservaion_records()
-
                 # Start Microservice A sender
                 microserviceSender.microservice_a_sender()
 
@@ -47,4 +39,25 @@ class MicroserviceSender:
         return
 
     def microservice_a_sender(self):
+        context = zmq.Context()
+        socket = context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:30000")
+
+        customer_name = input("Enter the customer name@: ")
+        request_reservation_json = {
+            "request": {
+                "event": "reservationData",
+                "body": {
+                    "customerName": customer_name
+                }
+            }
+        }
+        socket.send_json(request_reservation_json)
+
+        recv_message = socket.recv_string()
+        print("Receive message = %s" % recv_message)
+
+        socket.close()
+        context.destroy()
+
         return

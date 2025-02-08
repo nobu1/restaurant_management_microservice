@@ -7,3 +7,6 @@ CUSTOMER_DATA = "../csv/customers_data.csv"
 
 
 class MicroserviceC:
+
+    def coupon_records(self):
+        return
