@@ -28,7 +28,7 @@ class MicroserviceSender:
             elif microservice_input == "2":
                 microserviceSender.microservice_b_sender()
             elif microservice_input == "3":
-                microserviceC = MicroserviceC()
+                microserviceSender.microservice_c_sender()
             elif microservice_input == "4":
                 microserviceD = MicroserviceD()
             elif microservice_input == "5":
@@ -164,4 +164,19 @@ class MicroserviceSender:
         }
         socket.send_json(request_coupon_json)
 
+        # Extract JSON response
+        receive_coupon_json = socket.recv_json()
+        coupons_records = {
+            "Percent": receive_coupon_json["request"]["body"]["Percent"],
+            "Price": receive_coupon_json["request"]["body"]["Price"]
+        }
+        # Show results of analyzed coupon
+        x_data = coupons_records.keys()
+        y_data = coupons_records.values()
+        plt.yticks(range(0, max(y_data) + 1, 1))
+        plt.bar(x_data, y_data, align="center")
+        plt.ylabel("Coupon Category Counts")
+        plt.xlabel("Coupon Type")
+        plt.title("Coupon Profile")
+        plt.show()
         return
