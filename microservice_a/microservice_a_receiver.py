@@ -13,16 +13,18 @@ def reservaion_records():
     print("Reservation Records Receiver Startup.")
 
     while True:
+        # Receive JSON request
         reservation_records = socket.recv_json()
 
-        # Request message validation
+        # Confirm event data
         event = reservation_records['request']['event']
+
         if event == "reservationData":
             # Extract customer name from JSON
             customer_name = \
                 reservation_records['request']['body']['customerName']
 
-            # Extract customer data from customer_data.csv
+            # Extract customer data from reservation_data.csv
             df = pd.read_csv(RESERVATION_DATA)
             df = df[df['Name'] == customer_name]
 
@@ -56,6 +58,7 @@ def reservaion_records():
                 }
             }
 
+        # Respond JSON data
         socket.send_json(response_json)
 
     socket.close()

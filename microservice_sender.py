@@ -1,6 +1,7 @@
 import zmq
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 RESERVATION_DATA = "./csv/reservation_data.csv"
 
@@ -25,7 +26,7 @@ class MicroserviceSender:
                 # Start Microservice A sender
                 microserviceSender.microservice_a_sender()
             elif microservice_input == "2":
-                microserviceB = MicroserviceB()
+                microserviceSender.microservice_b_sender()
             elif microservice_input == "3":
                 microserviceC = MicroserviceC()
             elif microservice_input == "4":
@@ -88,5 +89,79 @@ class MicroserviceSender:
 
         socket.close()
         context.destroy()
+
+        return
+
+    def microservice_b_sender(self):
+        context = zmq.Context()
+        socket = context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:30001")
+
+        # Send request json
+        request_reservation_json = {
+            "request": {
+                "event": "customerAgeData",
+                "body": {}
+            }
+        }
+        socket.send_json(request_reservation_json)
+
+        # Extract JSON response
+        receive_customer_age_json = socket.recv_json()
+        customer_ages = {
+            "10s": 0,
+            "20s": 0,
+            "30s": 0,
+            "40s": 0,
+            "Over50s": 0
+        }
+        for age in receive_customer_age_json["request"]["body"]["customerAge"]:
+            if int(age) < 20:
+                customer_ages["10s"] += 1
+            elif 20 <= int(age) < 30:
+                customer_ages["20s"] += 1
+            elif 30 <= int(age) < 40:
+                customer_ages["30s"] += 1
+            elif 40 <= int(age) < 50:
+                customer_ages["40s"] += 1
+            elif int(age) >= 50:
+                customer_ages["Over50s"] += 1
+
+        # Show results of analyzed customer ages
+        ages = np.array(list(customer_ages.values()))
+        label = list(customer_ages)
+        plt.pie(
+            ages,
+            labels=label,
+            counterclock=False,
+            startangle=90,
+            autopct="%1.1f%%"
+        )
+        plt.title("Customers Age Profile")
+        plt.show()
+
+        return
+
+    def microservice_c_sender(self):
+        context = zmq.Context()
+        socket = context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:30002")
+
+        # Input start and end period
+        print("Input start and end period(Required)")
+        start = input("Start period(Required YYYY-MM-DD): ")
+        end = input("End period(Required YYYY--MM-DD): ")
+
+        # Send request json
+        request_coupon_json = {
+            "request": {
+                "event": "couponData",
+                "body": {
+                    "startPeriod": start,
+                    "endPeriod": end
+                }
+            }
+        }
+        socket.send_json(request_coupon_json)
 
         return
