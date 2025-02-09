@@ -3,4 +3,4 @@ ID,Name,Type,Amount,ValidDate
 2,CaliforniaCoupon,Percent,15,2025-02-28
 3,TestCoupon,Price,23,2025-01-18
 4,TestCoupon2,Price,8,2025-0508
-5,TestCoupon3,Percent,7,202504-19
+5,TestCoupon3,Percent,7,2025-04-19
