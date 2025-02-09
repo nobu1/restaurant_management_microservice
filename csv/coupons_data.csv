@@ -2,5 +2,5 @@ ID,Name,Type,Amount,ValidDate
 1,OregonCoupon,Percent,10,2025-03-31
 2,CaliforniaCoupon,Percent,15,2025-02-28
 3,TestCoupon,Price,23,2025-01-18
-4,TestCoupon2,Price,8,2025-0508
+4,TestCoupon2,Price,8,2025-05-08
 5,TestCoupon3,Percent,7,2025-04-19
