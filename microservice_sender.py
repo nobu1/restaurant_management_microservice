@@ -30,7 +30,7 @@ class MicroserviceSender:
             elif microservice_input == "3":
                 microserviceSender.microservice_c_sender()
             elif microservice_input == "4":
-                microserviceD = MicroserviceD()
+                microserviceSender.microservice_d_sender()
             elif microservice_input == "5":
                 # Back to admin page
                 print("Go back to admin page")
@@ -179,4 +179,52 @@ class MicroserviceSender:
         plt.xlabel("Coupon Type")
         plt.title("Coupon Profile")
         plt.show()
+
+        return
+
+    def microservice_d_sender(self):
+        context = zmq.Context()
+        socket = context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:30003")
+
+        # Send request json
+        request_restaurant_json = {
+            "request": {
+                "event": "restaurantData",
+                "body": {}
+            }
+        }
+        socket.send_json(request_restaurant_json)
+
+        # Extract JSON response
+        receive_restaurant_status_json = socket.recv_json()
+        restaurant_status = {
+            "Open": 0,
+            "Under Renovation": 0,
+            "Opening Preparation": 0,
+        }
+        restaurant_status['Open'] = \
+            receive_restaurant_status_json["request"]["body"]["Open"]
+        restaurant_status['Under Renovation'] = \
+            receive_restaurant_status_json["request"]["body"][
+                "Under Renovation"
+            ]
+        restaurant_status['Opening Preparation'] = \
+            receive_restaurant_status_json["request"]["body"][
+                "Opening Preparation"
+            ]
+
+        # Show results of analyzed restaurant status
+        stauts_counts = np.array(list(restaurant_status.values()))
+        label = list(restaurant_status.keys())
+        plt.pie(
+            stauts_counts,
+            labels=label,
+            counterclock=False,
+            startangle=90,
+            autopct="%1.1f%%"
+        )
+        plt.title("Restaurant Stauts Profile")
+        plt.show()
+
         return

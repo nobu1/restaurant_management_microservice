@@ -1,3 +1,7 @@
 ID,Name,Address,Status
-1,Test,456 Street,Opening Preparation
-3,Test ,785asdf,Open
+1,Test1,456 Street,Opening Preparation
+2,CA Restaurant,854 Main Street,Under Renovation
+3,Test3,785asdf,Open
+4,Test2,102 CA,Open
+5,Test4,11456 Avenue,Opening Preparation
+6,Test5,777 prefecture,Open
