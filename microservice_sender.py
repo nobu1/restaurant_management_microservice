@@ -1,5 +1,8 @@
 import zmq
+import pandas as pd
 import matplotlib.pyplot as plt
+
+RESERVATION_DATA = "./csv/reservation_data.csv"
 
 
 class MicroserviceSender:
@@ -21,7 +24,6 @@ class MicroserviceSender:
             if microservice_input == "1":
                 # Start Microservice A sender
                 microserviceSender.microservice_a_sender()
-
             elif microservice_input == "2":
                 microserviceB = MicroserviceB()
             elif microservice_input == "3":
@@ -40,39 +42,49 @@ class MicroserviceSender:
         return
 
     def microservice_a_sender(self):
+        # Show unique customers
+        df = pd.read_csv(RESERVATION_DATA)
+        customers = df["Name"].unique()
+        print("Input 5 customers name(Empty OK): ")
+        print(customers)
+
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
         socket.connect("tcp://localhost:30000")
 
         # Send request json
-        customer_name = input("Enter the customer name: ")
-        print("\n")
-        request_reservation_json = {
-            "request": {
-                "event": "reservationData",
-                "body": {
-                    "customerName": customer_name
+        reservation_records = {}
+        for i in range(5):
+            customer_name = input("Enter the customer name: ")
+            request_reservation_json = {
+                "request": {
+                    "event": "reservationData",
+                    "body": {
+                        "customerName": customer_name
+                    }
                 }
             }
-        }
-        socket.send_json(request_reservation_json)
+            socket.send_json(request_reservation_json)
 
-        # Extract JSON response
-        receive_reservaion_json = socket.recv_json()
-        reservation_count = 0
-        histories = receive_reservaion_json['request']['body']['history']
-        for data in histories:
-            reservation_count += 1
+            # Extract JSON response
+            receive_reservaion_json = socket.recv_json()
+            reservation_count = 0
+            histories = receive_reservaion_json['request']['body']['history']
+            for _ in histories:
+                reservation_count += 1
 
-        # Show analyze message
-        print("Results of analyzed reservation by a customer")
-        print(
-            str(customer_name) +
-            " had " +
-            str(reservation_count) +
-            " reservations in the entire period."
-        )
-        print("\n")
+            # Store reservation count by user
+            reservation_records[customer_name] = reservation_count
+
+        # Show results of analyzed reservation
+        x_data = reservation_records.keys()
+        y_data = reservation_records.values()
+        plt.yticks(range(0, max(y_data) + 1, 1))
+        plt.bar(x_data, y_data, align="center")
+        plt.ylabel("Reservation Counts")
+        plt.xlabel("Customers Name")
+        plt.title("Reservation Trends by customers")
+        plt.show()
 
         socket.close()
         context.destroy()

@@ -48,8 +48,11 @@ def reservaion_records():
         else:
             response_json = {
                 "request": {
-                    "event": "reservationDataError",
-                    "body": {}
+                    "event": "reservationData",
+                    "body": {
+                        "customerName": customer_name,
+                        "history": []
+                    }
                 }
             }
 
