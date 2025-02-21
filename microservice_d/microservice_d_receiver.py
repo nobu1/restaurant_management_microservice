@@ -3,63 +3,57 @@ import pandas as pd
 
 
 RESTAURANT_DATA = "../csv/restaurants_data.csv"
+CONNECTION_PORT = 30003
+
+
+def response_json_with_restaurant_status(socket, restaurant_status):
+    # Construct JSON
+    response_json = {
+        "response": {
+            "event": "restaurantData",
+            "body": {
+                "Open": restaurant_status["open"],
+                "Under Renovation": restaurant_status["under_renovation"],
+                "Opening Preparation": restaurant_status["opening_preparation"]
+            }
+        }
+    }
+    socket.send_json(response_json)
 
 
 def restaurant_records():
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind("tcp://*:30003")
+    socket.bind("tcp://*:" + str(CONNECTION_PORT))
 
     print("Restaurant Records Receiver Startup.")
 
     while True:
-        # Receive JSON request
+        # Set variables
         restaurant_records = socket.recv_json()
+        event = restaurant_records['request']['event']
+        restaurant_status = {
+            "open": 0,
+            "under_renovation": 0,
+            "opening_preparation": 0
+        }
 
         # Confirm event data
-        event = restaurant_records['request']['event']
-
         if event == "restaurantData":
-            # Read restaurants_data.csv
             df = pd.read_csv(RESTAURANT_DATA)
-            open = 0
-            under_renovation = 0
-            opening_preparation = 0
 
+            # Collect restaurant status data
             for _, row in df.iterrows():
                 if row['Status'] == "Open":
-                    open += 1
+                    restaurant_status["open"] += 1
                 elif row['Status'] == "Under Renovation":
-                    under_renovation += 1
+                    restaurant_status["under_renovation"] += 1
                 elif row['Status'] == "Opening Preparation":
-                    opening_preparation += 1
+                    restaurant_status["opening_preparation"] += 1
 
-            # Make JSON
-            response_json = {
-                "request": {
-                    "event": "restaurantData",
-                    "body": {
-                        "Open": open,
-                        "Under Renovation": under_renovation,
-                        "Opening Preparation": opening_preparation
-                    }
-                }
-            }
-
+            response_json_with_restaurant_status(socket, restaurant_status)
         else:
-            response_json = {
-                "request": {
-                    "event": "restaurantData",
-                    "body": {
-                        "Open": 0,
-                        "Under Renovation": 0,
-                        "Opening Preparation": 0
-                    }
-                }
-            }
-
-        # Response JSON data
-        socket.send_json(response_json)
+            response_json_with_restaurant_status(socket, restaurant_status)
 
     socket.close()
     context.destroy()

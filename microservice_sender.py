@@ -70,7 +70,7 @@ class MicroserviceSender:
             # Extract JSON response
             receive_reservaion_json = socket.recv_json()
             reservation_count = 0
-            histories = receive_reservaion_json['request']['body']['history']
+            histories = receive_reservaion_json['response']['body']['history']
             for _ in histories:
                 reservation_count += 1
 
@@ -115,7 +115,9 @@ class MicroserviceSender:
             "40s": 0,
             "Over50s": 0
         }
-        for age in receive_customer_age_json["request"]["body"]["customerAge"]:
+        for age in (
+            receive_customer_age_json["response"]["body"]["customerAge"]
+        ):
             if int(age) < 20:
                 customer_ages["10s"] += 1
             elif 20 <= int(age) < 30:
@@ -126,7 +128,7 @@ class MicroserviceSender:
                 customer_ages["40s"] += 1
             elif int(age) >= 50:
                 customer_ages["Over50s"] += 1
-
+        print(customer_ages)
         # Show results of analyzed customer ages
         ages = np.array(list(customer_ages.values()))
         label = list(customer_ages)
@@ -167,8 +169,8 @@ class MicroserviceSender:
         # Extract JSON response
         receive_coupon_json = socket.recv_json()
         coupons_records = {
-            "Percent": receive_coupon_json["request"]["body"]["Percent"],
-            "Price": receive_coupon_json["request"]["body"]["Price"]
+            "Percent": receive_coupon_json["response"]["body"]["Percent"],
+            "Price": receive_coupon_json["response"]["body"]["Price"]
         }
         # Show results of analyzed coupon
         x_data = coupons_records.keys()
@@ -204,13 +206,13 @@ class MicroserviceSender:
             "Opening Preparation": 0,
         }
         restaurant_status['Open'] = \
-            receive_restaurant_status_json["request"]["body"]["Open"]
+            receive_restaurant_status_json["response"]["body"]["Open"]
         restaurant_status['Under Renovation'] = \
-            receive_restaurant_status_json["request"]["body"][
+            receive_restaurant_status_json["response"]["body"][
                 "Under Renovation"
             ]
         restaurant_status['Opening Preparation'] = \
-            receive_restaurant_status_json["request"]["body"][
+            receive_restaurant_status_json["response"]["body"][
                 "Opening Preparation"
             ]
 

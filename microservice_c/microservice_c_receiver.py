@@ -4,22 +4,37 @@ from datetime import datetime as dt
 
 
 COUPONS_DATA = "../csv/coupons_data.csv"
+CONNECTION_PORT = 30002
+
+
+def response_json_with_coupon_data(socket, price, percent):
+    # Construct JSON
+    response_json = {
+        "response": {
+            "event": "couponData",
+            "body": {
+                "Percent": percent,
+                "Price": price
+            }
+        }
+    }
+    socket.send_json(response_json)
 
 
 def coupon_records():
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind("tcp://*:30002")
+    socket.bind("tcp://*:" + str(CONNECTION_PORT))
 
     print("Coupons Records Receiver Startup.")
 
     while True:
-        # Receive JSON request
+        # Set variables
         coupon_records = socket.recv_json()
+        event = coupon_records['request']['event']
+        percent = price = 0
 
         # Confirm event data
-        event = coupon_records['request']['event']
-
         if event == "couponData":
             # Extract start and end period and convert to datatime
             start = dt.strptime(
@@ -31,10 +46,9 @@ def coupon_records():
                 '%Y-%m-%d'
             )
 
-            # Read coupon_data.csv
             df = pd.read_csv(COUPONS_DATA)
-            percent = 0
-            price = 0
+
+            # Collect percent and price data with specified period
             for _, row in df.iterrows():
                 if start <= pd.to_datetime(row['ValidDate']) <= end:
                     if row['Type'] == "Percent":
@@ -42,30 +56,9 @@ def coupon_records():
                     elif row['Type'] == "Price":
                         price += 1
 
-            # Make JSON
-            response_json = {
-                "request": {
-                    "event": "couponData",
-                    "body": {
-                        "Percent": percent,
-                        "Price": price
-                    }
-                }
-            }
-
+            response_json_with_coupon_data(socket, price, percent)
         else:
-            response_json = {
-                "request": {
-                    "event": "couponData",
-                    "body": {
-                        "Percent": 0,
-                        "Price": 0
-                    }
-                }
-            }
-
-        # Response JSON data
-        socket.send_json(response_json)
+            response_json_with_coupon_data(socket, price, percent)
 
     socket.close()
     context.destroy()

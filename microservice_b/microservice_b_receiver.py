@@ -3,51 +3,46 @@ import pandas as pd
 
 
 CUSTOMER_DATA = "../csv/customers_data.csv"
+CONNECTION_PORT = 30001
+
+
+def response_json_with_customer_age(socket, ages):
+    # Construct JSON
+    response_json = {
+        "response": {
+            "event": "customerAgeData",
+            "body": {
+                "customerAge": ages
+            }
+        }
+    }
+    socket.send_json(response_json)
 
 
 def customer_records():
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind("tcp://*:30001")
+    socket.bind("tcp://*:" + str(CONNECTION_PORT))
 
     print("Customer Records Receiver Startup.")
 
     while True:
-        # Receive JSON request
+        # Set variables
         customer_records = socket.recv_json()
+        event = customer_records['request']['event']
+        ages = []
 
         # Confirm event data
-        event = customer_records['request']['event']
-
         if event == "customerAgeData":
-            # Read customer_data.csv
             df = pd.read_csv(CUSTOMER_DATA)
-            ages = []
+
+            # Collect customer ages
             for _, row in df.iterrows():
                 ages.append(str(row['Age']))
 
-            # Make JSON
-            response_json = {
-                "request": {
-                    "event": "customerAgeData",
-                    "body": {
-                        "customerAge": ages
-                    }
-                }
-            }
-
+            response_json_with_customer_age(socket, ages)
         else:
-            response_json = {
-                "request": {
-                    "event": "customerAgeData",
-                    "body": {
-                        "customerAge": []
-                    }
-                }
-            }
-
-        # Response JSON data
-        socket.send_json(response_json)
+            response_json_with_customer_age(socket, ages)
 
     socket.close()
     context.destroy()
