@@ -18,6 +18,7 @@ def response_json_with_restaurant_status(socket, restaurant_status):
             }
         }
     }
+    print(f"Response sent was: {response_json}")
     socket.send_json(response_json)
 
 

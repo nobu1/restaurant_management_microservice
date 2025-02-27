@@ -18,6 +18,7 @@ def response_json_with_coupon_data(socket, price, percent):
             }
         }
     }
+    print(f"Response sent was: {response_json}")
     socket.send_json(response_json)
 
 

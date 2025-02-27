@@ -16,6 +16,7 @@ def response_json_with_customer_age(socket, ages):
             }
         }
     }
+    print(f"Response sent was: {response_json}")
     socket.send_json(response_json)
 
 
