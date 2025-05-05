@@ -1,7 +1,2 @@
-**/__pycache__/**
-/__pycache__/*.pyc
-/microservice_a/__pycache__
-/microservice_b/__pycache__
-/microservice_c/__pycache__
-/microservice_d/__pycache__
-.gitignore
+__pycache__/
+*.pyc
