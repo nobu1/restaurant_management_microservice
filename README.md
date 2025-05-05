@@ -25,7 +25,7 @@ A modular, microservices-based restaurant management system. This project demons
 
 This project follows a microservices architecture. Each core feature is implemented as an independent service, allowing for easier scaling, deployment, and maintenance.
 
-Services communicate via REST APIs and/or message brokers (e.g., ZeroMQ).
+Services communicate via ZeroMQ.
 
 ---
 
